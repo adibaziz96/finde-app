@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { UserToggle } from "@/components/user-toggle";
 import Image from "next/image";
 
 export default function User() {
@@ -18,7 +18,7 @@ export default function User() {
             <span className="text-xs text-muted-foreground">Software Developer</span>
           </div>
         </div>
-        <ChevronDown size={16} />
+        <UserToggle />
       </div>
     </div>
   );

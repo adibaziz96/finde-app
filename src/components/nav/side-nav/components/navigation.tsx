@@ -23,7 +23,7 @@ export default function Navigation() {
             )}
           >
             <Icon
-              size={16}
+              size={18}
               className="mr-2 text-slate-800 dark:text-slate-200"
             />
             <span className="text-sm text-slate-700 dark:text-slate-300">

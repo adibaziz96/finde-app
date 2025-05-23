@@ -1,31 +1,39 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { login } from "@/services/auth";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { login, storeToken } from "@/services/auth";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => setHasMounted(true), []);
+  if (!hasMounted) return null;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     try {
-      await login(email, password).then(() => {
-        router.push("/dashboard");
-      });
+      const res = await login(email, password);
+      storeToken(res.token);
+      router.replace("/");
+      router.refresh();
     } catch (error: any) {
-      console.error("Login error:", error?.response?.data || error.message);
+      setError(error.message || "Login failed");
     }
   };
 
@@ -51,6 +59,7 @@ export function LoginForm({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="off"
                 />
               </div>
 
@@ -70,12 +79,15 @@ export function LoginForm({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="off"
                 />
               </div>
 
               <Button type="submit" className="w-full">
                 Login
               </Button>
+
+              {error && <p className="text-red-500 text-sm">{error}</p>}
 
               <div className="text-center text-sm">
                 Don’t have an account?{" "}
@@ -86,19 +98,23 @@ export function LoginForm({
             </div>
           </form>
 
-          <div className="relative hidden bg-muted md:block">
-            <img
+          <div className="relative hidden bg-muted md:block h-[500px]">
+            <Image
               src="/finde.png"
-              alt="Image"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              alt="Login illustration"
+              fill
+              priority
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="object-cover dark:brightness-[0.2] dark:grayscale"
             />
           </div>
         </CardContent>
       </Card>
 
       <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        By clicking continue, you agree to our{" "}
+        <a href="#">Terms of Service</a> and{" "}
+        <a href="#">Privacy Policy</a>.
       </div>
     </div>
   );
